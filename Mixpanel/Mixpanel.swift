@@ -12,7 +12,7 @@ import UIKit
 #endif // os(OSX)
 
 /// The primary class for integrating Mixpanel with your app.
-open class Mixpanel {
+open class Mixpanel: NSObject {
 
     #if !os(OSX)
     /**

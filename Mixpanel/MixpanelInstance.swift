@@ -37,7 +37,7 @@ protocol AppLifecycle {
 }
 
 /// The class that represents the Mixpanel Instance
-open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDelegate {
+open class MixpanelInstance: NSObject, FlushDelegate, AEDelegate {
 
     /// The a MixpanelDelegate object that gives control over Mixpanel network activity.
     open var delegate: MixpanelDelegate?
@@ -98,7 +98,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
     }
 
-    open var debugDescription: String {
+	override open var debugDescription: String {
         return "Mixpanel(\n"
         + "    Token: \(apiToken),\n"
         + "    Events Queue Count: \(eventsQueue.count),\n"
@@ -237,7 +237,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #endif // DECIDE
 
     #if !os(OSX)
-    init(apiToken: String?, launchOptions: [UIApplicationLaunchOptionsKey : Any]?, flushInterval: Double, name: String) {
+    public init(apiToken: String?, launchOptions: [UIApplicationLaunchOptionsKey : Any]?, flushInterval: Double, name: String) {
+
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
         }
@@ -247,6 +248,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             decideInstance = Decide(basePathIdentifier: name)
         #endif // DECIDE
         trackInstance = Track(apiToken: self.apiToken)
+
+		super.init()
+
         let label = "com.mixpanel.\(self.apiToken)"
         serialQueue = DispatchQueue(label: label)
         flushInstance.delegate = self
@@ -273,7 +277,7 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         #endif // DECIDE
     }
     #else
-    init(apiToken: String?, flushInterval: Double, name: String) {
+    public init(apiToken: String?, flushInterval: Double, name: String) {
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
         }
@@ -302,12 +306,10 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
                                            selector: #selector(setCurrentRadio),
                                            name: .CTRadioAccessTechnologyDidChange,
                                            object: nil)
-            #if DECIDE
             notificationCenter.addObserver(self,
                                            selector: #selector(executeTweaks),
                                            name: Notification.Name("MPExecuteTweaks"),
                                            object: nil)
-            #endif
         #endif // os(iOS)
         if !MixpanelInstance.isiOSAppExtension() {
             notificationCenter.addObserver(self,
