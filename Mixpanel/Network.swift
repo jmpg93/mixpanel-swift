@@ -18,8 +18,13 @@ struct BasePath {
             return nil
         }
         var components = URLComponents(url: url, resolvingAgainstBaseURL: true)
-        components?.path = path
-        components?.queryItems = queryItems
+
+		if let queryItems = queryItems, let queryItemsComponents = components?.queryItems {
+			components?.queryItems = queryItems + queryItemsComponents
+		} else {
+			components?.queryItems = queryItems
+		}
+
         return components?.url
     }
 
