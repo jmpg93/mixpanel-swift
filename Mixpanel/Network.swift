@@ -21,7 +21,7 @@ struct BasePath {
 
 		if let queryItems = queryItems, let queryItemsComponents = components?.queryItems {
 			components?.queryItems = queryItems + queryItemsComponents
-		} else {
+		} else if let queryItems = queryItems {
 			components?.queryItems = queryItems
 		}
 
