@@ -37,7 +37,8 @@ protocol AppLifecycle {
 }
 
 /// The class that represents the Mixpanel Instance
-open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDelegate {
+// [TM] - APPS-1767 - Allow interoperability - Inherit from NSObject
+open class MixpanelInstance: NSObject, FlushDelegate, AEDelegate {
 
     /// The a MixpanelDelegate object that gives control over Mixpanel network activity.
     open var delegate: MixpanelDelegate?
@@ -98,7 +99,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         }
     }
 
-    open var debugDescription: String {
+	// [TM] - APPS-1767 - Allow interoperability - Override debugDescription from NSObject
+	override open var debugDescription: String {
         return "Mixpanel(\n"
         + "    Token: \(apiToken),\n"
         + "    Events Queue Count: \(eventsQueue.count),\n"
@@ -237,7 +239,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
     #endif // DECIDE
 
     #if !os(OSX)
-    init(apiToken: String?, launchOptions: [UIApplicationLaunchOptionsKey : Any]?, flushInterval: Double, name: String) {
+	// [TM] - APPS-1767 - Allow interoperability - Make init public
+    public init(apiToken: String?, launchOptions: [UIApplicationLaunchOptionsKey : Any]?, flushInterval: Double, name: String) {
+
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
         }
@@ -247,6 +251,9 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
             decideInstance = Decide(basePathIdentifier: name)
         #endif // DECIDE
         trackInstance = Track(apiToken: self.apiToken)
+
+		super.init()
+
         let label = "com.mixpanel.\(self.apiToken)"
         serialQueue = DispatchQueue(label: label)
         flushInstance.delegate = self
@@ -273,7 +280,8 @@ open class MixpanelInstance: CustomDebugStringConvertible, FlushDelegate, AEDele
         #endif // DECIDE
     }
     #else
-    init(apiToken: String?, flushInterval: Double, name: String) {
+	// [TM] - APPS-1767 - Allow interoperability - Make init public
+    public init(apiToken: String?, flushInterval: Double, name: String) {
         if let apiToken = apiToken, !apiToken.isEmpty {
             self.apiToken = apiToken
         }
@@ -902,7 +910,9 @@ extension MixpanelInstance {
      - parameter event:      event name
      - parameter properties: properties dictionary
      */
-    open func track(event: String?, properties: Properties? = nil) {
+	// [TM] - APPS-1767 - Allow interoperability - Properties to [String: Any]?
+    open func track(event: String?, properties: [String: Any]? = nil) {
+		guard let properties = properties as? Properties else { return }
         let epochInterval = Date().timeIntervalSince1970
         serialQueue.async() {
             self.trackInstance.track(event: event,

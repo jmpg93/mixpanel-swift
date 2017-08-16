@@ -8,7 +8,8 @@
 
 
 protocol AEDelegate {
-    func track(event: String?, properties: Properties?)
+	// [TM] - APPS-1767 - Allow interoperability - Properties to [String: Any]?
+    func track(event: String?, properties: [String: Any]?)
     #if DECIDE
         func trackPushNotification(_ userInfo: [AnyHashable: Any], event: String)
     #endif

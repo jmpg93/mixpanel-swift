@@ -18,8 +18,20 @@ struct BasePath {
             return nil
         }
         var components = URLComponents(url: url, resolvingAgainstBaseURL: true)
-        components?.path = path
-        components?.queryItems = queryItems
+
+		// [TM] - APPS-1767 - All request not being done on the custom server should add the path.
+		// This is allowing requests to /decide enpoint.
+		if base == DefaultMixpanelAPI {
+			components?.path = path
+		}
+
+		// [TM] - APPS-1767 - Avoid overriding query items.
+		if let queryItems = queryItems, let queryItemsComponents = components?.queryItems {
+			components?.queryItems = queryItems + queryItemsComponents
+		} else if let queryItems = queryItems {
+			components?.queryItems = queryItems
+		}
+
         return components?.url
     }
 
